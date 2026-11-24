@@ -3,7 +3,7 @@ name: Release (Android APK + browser extension)
 on:
   push:
     branches: [main]
-    paths: ['package.json']
+    paths: ['package.json', '.github/workflows/release.yml']
     tags: ['v*']
   workflow_dispatch:
 
@@ -29,8 +29,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-
-      - uses: android-actions/setup-android@v3
 
       - name: Install tools
         run: npm install --no-audit --no-fund
