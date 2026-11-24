@@ -11,7 +11,9 @@ export default async function handler(req, res) {
   const photoId = String(b.photoId || '').replace(/[^a-z0-9]/gi, '').slice(0, 16);
   if (!photoId) return send(res, 400, { error: 'Missing photo' });
   const desc = `${String(b.lens || 'Lens render').slice(0, 120)} · ${String(b.size || '').replace(/[^0-9x]/g, '').slice(0, 20)}`;
-  const site = (env('SITE_URL') || `https://${req.headers.host}`).replace(/\/$/, '');
+  // Return links always go to your configured site, never to an address taken from the request.
+  const site = env('SITE_URL').replace(/\/$/, '');
+  if (!/^https:\/\/[^/]+/.test(site)) return send(res, 503, { error: 'SITE_URL is not configured' });
   const f = new URLSearchParams({
     mode: 'payment',
     success_url: b.mode === 'tab' ? `${site}/paid.html` : `${site}/?paid={CHECKOUT_SESSION_ID}`,

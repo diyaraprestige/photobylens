@@ -1,0 +1,15 @@
+Copyright (c) 2026 Diyara Prestige Enterprise. All rights reserved.
+
+The Photobylens source code, design, lens profiles and artwork in this repository
+are published so people can see the code and download the official app builds.
+You may install and use the official releases. You may not copy, modify,
+redistribute, resell or publish this code or its assets, in whole or in part,
+without written permission from Diyara Prestige Enterprise.
+
+Third-party components keep their own licenses:
+- three.js (assets/vendor/three.min.js): MIT License, Copyright 2010-2023 three.js authors.
+- Inter and Manrope fonts (assets/fonts): SIL Open Font License 1.1, see assets/fonts/OFL-*.txt.
+- Capacitor (Android build tooling): MIT License, Copyright Ionic.
+
+Camera and lens names belong to their respective owners and are used only to
+describe each lens's optical style. Photobylens is not affiliated with them.

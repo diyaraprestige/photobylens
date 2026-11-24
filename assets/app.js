@@ -373,6 +373,7 @@ async function generateHD(){
  const long=Math.min(E.maxTex||4096,HD_MAX,Math.max(SRC.ow||SRC.w,SRC.oh||SRC.h,SRC.w,SRC.h));
  const blob=await renderBlob(long,.95);busy('');
  setHDReady({blob,name:fileName(true)});
+ clearSession();
 }
 function setHDReady(x){
  if(HD_READY&&HD_READY.url)URL.revokeObjectURL(HD_READY.url);
@@ -433,6 +434,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 function idb(){return new Promise((res,rej)=>{const q=indexedDB.open('photobylens',1);q.onupgradeneeded=()=>q.result.createObjectStore('s');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
 async function idbSet(k,v){const db=await idb();return new Promise((res,rej)=>{const t=db.transaction('s','readwrite');t.objectStore('s').put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error);});}
 async function idbGet(k){const db=await idb();return new Promise((res,rej)=>{const t=db.transaction('s');const q=t.objectStore('s').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
+async function clearSession(){try{const db=await idb();await new Promise(r=>{const t=db.transaction('s','readwrite');t.objectStore('s').delete('session');t.oncomplete=r;t.onerror=r;});}catch(e){}}
+async function pruneSession(){try{const s=await idbGet('session');if(s&&(!s.t||Date.now()-s.t>24*3600*1000))await clearSession();}catch(e){}}
 async function saveSession(){
  await idbSet('session',{file:SRC.file,id:SRC.id,depth:DEPTH?{a:DEPTH.a,w:DEPTH.w,h:DEPTH.h}:null,local:LOCAL,ai:AI,st:{id:st.id,f:st.f,N:st.N,amt:st.amt,edit:st.edit,fx:st.fx,fy:st.fy,fd:st.fd,crop:st.crop},t:Date.now()});
 }
@@ -476,6 +479,7 @@ refreshAIBadge();
  await loadConfig();
  if(!ok){selectLens(byId[st.id]?st.id:'canon-70-200');return;}
  const restored=await handleReturn();
+ if(!restored)pruneSession();
  if(!restored){
   const demo=P.sampleScene();setSource(demo.c,{});
   const y=demo.dc.getContext('2d').getImageData(0,0,480,320).data,arr=new Float32Array(480*320);

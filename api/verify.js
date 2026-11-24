@@ -8,12 +8,14 @@ export default async function handler(req, res) {
   if (!key) return send(res, 503, { error: 'Payments are not configured' });
   const b = await body(req).catch(() => ({}));
   const id = String(b.session_id || '');
-  if (!/^cs_[A-Za-z0-9_]{10,200}$/.test(id)) return send(res, 400, { paid: false });
+  const photoId = String(b.photoId || '').replace(/[^a-z0-9]/gi, '').slice(0, 16);
+  if (!/^cs_[A-Za-z0-9_]{10,200}$/.test(id) || !photoId) return send(res, 400, { paid: false });
   try {
     const r = await fetch(`https://api.stripe.com/v1/checkout/sessions/${id}`, { headers: { authorization: `Bearer ${key}` } });
     const j = await r.json();
     if (!r.ok) return send(res, 404, { paid: false });
-    const paid = j.payment_status === 'paid' && (!b.photoId || (j.metadata && j.metadata.photoId === String(b.photoId)));
+    // Only a paid session bought for this exact photo unlocks HD.
+    const paid = j.payment_status === 'paid' && !!j.metadata && j.metadata.photoId === photoId;
     send(res, 200, { paid });
   } catch (e) {
     console.error(e);

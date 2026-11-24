@@ -39,9 +39,12 @@ Open **https://diyaraprestige.github.io/photobylens/**. In Chrome or Edge, use *
 
 No billing is needed. On Google's free tier, Google may use the data you send to improve its products.
 
+## Privacy
+Photos are processed on your device and never uploaded to Photobylens. No tracking, ads or cookies. Details: [SECURITY.md](SECURITY.md).
+
 ## All releases
 See **[Releases](https://github.com/diyaraprestige/photobylens/releases)**.
 
 ---
-Lens names belong to their makers and only describe each lens's optical style. Lens models are original 3D renders. © Diyara Prestige Enterprise.
+Lens names belong to their makers and only describe each lens's optical style. Lens models are original 3D renders. © Diyara Prestige Enterprise. All rights reserved, see [LICENSE](LICENSE).
 For hosting, payments and builds, see [DEPLOY.md](DEPLOY.md).

@@ -51,7 +51,7 @@ The site needs HTTPS: browsers only allow the camera-roll upload and payments on
 | `STRIPE_SECRET_KEY` | Your Stripe secret key. Use `sk_test_…` while testing and `sk_live_…` for real payments. |
 | `HD_PRICE_SEN` | HD price in sen, e.g. `990` = RM9.90. While this is `0`, the HD button shows "being set up". |
 | `CURRENCY` | `MYR` by default. |
-| `SITE_URL` | Your live address. Buyers are sent back here after paying. |
+| `SITE_URL` | **Required for payments.** Your live `https://` address. Buyers are sent back here after paying. |
 
 In the Stripe Dashboard → Settings → Payment methods, switch on FPX, cards, and GrabPay if you want it. Checkout then offers them automatically.
 
@@ -80,3 +80,10 @@ Each entry in `assets/lenses.js` has:
 - a short `look` line and `best` uses
 - the rendering character `ch`: contrast, saturation, warmth, clarity, vignette, glow, flare, bokeh shape, swirl, fisheye, tilt-shift and so on
 - the 3D body shape `b`: length, diameter and colour, where `k` is black, `w` white, `s` silver and `b` brass
+
+## Security checklist (one-time, in GitHub Settings)
+- **Code security:** turn on Dependabot alerts, Secret scanning and Push protection, and Private vulnerability reporting.
+- **Branches:** add a rule for `main` that blocks force pushes and deletion.
+- **Actions → General:** set Workflow permissions to "Read repository contents" (the workflows ask for more only where needed).
+- **Never commit** `.env`, your Stripe key or the `.jks` signing key. `.gitignore` already blocks them.
+- **Stripe:** use a restricted key with only Checkout Sessions write and read permission instead of the full secret key.
