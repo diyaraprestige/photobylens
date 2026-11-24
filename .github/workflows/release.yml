@@ -1,0 +1,95 @@
+name: Release (Android APK + browser extension)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PBL_API_BASE: ${{ vars.PBL_API_BASE }}
+      KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+      KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install tools
+        run: npm install --no-audit --no-fund
+
+      - name: Build web, app and extension
+        run: |
+          node scripts/build.mjs app
+          node scripts/build.mjs ext
+          node scripts/build.mjs pages
+
+      - name: Create Android project
+        run: |
+          npx cap add android
+          npx @capacitor/assets generate --android --iconBackgroundColor '#121331' --iconBackgroundColorDark '#121331' --splashBackgroundColor '#eef0fa' --splashBackgroundColorDark '#121331' --assetPath resources || echo "Icon generation skipped"
+          npx cap sync android
+
+      - name: Build APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          if [ -n "$KS_B64" ]; then ./gradlew assembleRelease --no-daemon; else ./gradlew assembleDebug --no-daemon; fi
+
+      - name: Sign APK
+        run: |
+          mkdir -p out
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > release.jks
+            BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+            "$BT/zipalign" -p -f 4 android/app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+            "$BT/apksigner" sign --ks release.jks --ks-pass env:KS_PASS --ks-key-alias "$KS_ALIAS" --out out/Photobylens.apk aligned.apk
+            "$BT/apksigner" verify out/Photobylens.apk
+            rm -f release.jks
+          else
+            cp android/app/build/outputs/apk/debug/app-debug.apk out/Photobylens.apk
+            echo "::warning::No signing key set, published a debug-signed APK."
+          fi
+
+      - name: Package extension and website
+        run: |
+          (cd dist/extension && zip -qr ../../out/Photobylens-extension.zip .)
+          (cd dist/pages && zip -qr ../../out/Photobylens-web.zip .)
+          ls -la out
+
+      - name: Pick release tag
+        id: tag
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"; else echo "name=v$(node -p "require('./package.json').version")-build${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: Photobylens ${{ steps.tag.outputs.name }}
+          make_latest: true
+          body: |
+            ## Download
+            - **Android:** `Photobylens.apk`. Open it on your phone and allow "Install unknown apps" for your browser when asked.
+            - **Chrome / Edge / Brave:** `Photobylens-extension.zip`. Unzip it, open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and choose the unzipped folder.
+            - **Website files:** `Photobylens-web.zip` (for self-hosting).
+
+            Photos stay on your device. AI retouch runs on your own free Gemini key.
+          files: |
+            out/Photobylens.apk
+            out/Photobylens-extension.zip
+            out/Photobylens-web.zip

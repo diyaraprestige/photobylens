@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Photobylens - Lens Studio",
+  "short_name": "Photobylens",
+  "version": "1.0.0",
+  "description": "See your phone photo through 40 legendary lenses. AI retouch, real bokeh, tap to focus. Photos stay on your device.",
+  "icons": { "16": "assets/icons/icon-16.png", "32": "assets/icons/icon-32.png", "48": "assets/icons/icon-48.png", "128": "assets/icons/icon-128.png" },
+  "action": { "default_title": "Open Photobylens", "default_icon": { "16": "assets/icons/icon-16.png", "32": "assets/icons/icon-32.png", "48": "assets/icons/icon-48.png" } },
+  "background": { "service_worker": "background.js" },
+  "host_permissions": ["https://generativelanguage.googleapis.com/*"]
+}

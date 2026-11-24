@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#eef0fa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32.png">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<title>Photobylens Lens Studio</title>
+<meta name="description" content="Render your phone photo as if it was shot on 40 legendary camera lenses. AI depth, real bokeh, full original size.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<header class="nav">
+ <a class="brand" href="#top" aria-label="Photobylens home">
+  <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="#121331"/><g fill="#8b8dff"><path d="M16 5 L22 13.5 L11.5 9.5Z"/><path d="M27 16 L18.5 22 L22.5 11.5Z" opacity=".85"/><path d="M16 27 L10 18.5 L20.5 22.5Z" opacity=".7"/><path d="M5 16 L13.5 10 L9.5 20.5Z" opacity=".55"/></g><circle cx="16" cy="16" r="3.6" fill="#121331"/></svg>
+  Photobylens
+ </a>
+ <nav class="links"><a href="#studio">Studio</a><a href="#library">Lenses</a><a href="#pricing">Pricing</a><a href="#apps" class="web-only">Get the app</a></nav>
+ <a class="btn dark" href="#studio">Open studio</a>
+</header>
+
+<main id="top">
+<section class="hero wrap">
+ <div class="hero-copy">
+  <h1>See your phone photo through legendary glass</h1>
+  <p>Upload any photo, even a boring one. AI sets the focus, aperture, white balance and colour like a finished edit, then renders it through any of 40 iconic lenses with real bokeh. Everything stays in your browser.</p>
+  <div class="row">
+   <label class="btn pri" for="file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Upload a photo</label>
+   <a class="btn ghost" href="#library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Browse lenses</a>
+  </div>
+ </div>
+ <div class="hero-stage" aria-label="3D lens model, drag to rotate">
+  <div class="dish"></div>
+  <canvas id="lens3d"></canvas>
+  <div class="cube c1"><i class="s1"></i><i class="s2"></i></div>
+  <div class="cube c2 dk"><i class="s3"></i><i class="s4"></i></div>
+  <div class="cube c3"><i class="s5"></i><i class="s6"></i></div>
+  <div class="orb o1"></div><div class="orb o2"></div>
+  <span class="hint3d">Drag to rotate</span>
+ </div>
+</section>
+
+<section class="wrap">
+ <div class="strip">
+  <div class="strip-l"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b8dff" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg><span>Mounted lens</span></div>
+  <div class="strip-lens"><img id="stripImg" alt=""><div><b id="stripName"></b><small id="stripSpec"></small></div></div>
+  <div class="strip-stat"><small>Depth</small><b id="stripAI">On-device</b></div>
+  <div class="strip-stat"><small>Output</small><b id="stripOut">—</b></div>
+  <a class="btn pri sm" href="#studio">Render now</a>
+ </div>
+ <div class="stats">
+  <div class="stat"><small>Lenses</small><b>40</b><span class="tag">11 categories</span></div>
+  <div class="stat"><small>Retouch</small><b>Auto</b><span class="tag">WB, tone, colour</span></div>
+  <div class="stat"><small>HD export</small><b>Full res</b><span class="tag">Up to 6000px</span></div>
+  <div class="stat"><small>AI</small><b>Free</b><span class="tag">Your own Gemini</span></div>
+ </div>
+</section>
+
+<section class="wrap sec" id="studio">
+ <div class="sec-head">
+  <h2>Lens studio</h2>
+  <p>Tap anywhere to choose what stays sharp. Zoom and macro lenses crop in around your subject; use Frame to move the crop so heads and bodies are never cut.</p>
+ </div>
+ <div class="studio">
+  <div class="card glass viewer-card">
+   <div class="view" id="view">
+    <div class="frame" id="frame">
+     <canvas id="out" aria-label="Photo rendered through the selected lens"></canvas>
+     <canvas id="before" aria-hidden="true"></canvas>
+     <div class="split" id="split"></div>
+     <span class="ptag l">Original</span><span class="ptag r" id="tagR">Lens</span>
+     <div class="ret" id="ret"></div>
+     <div class="cropbox" id="cropbox" hidden><span>Lens frame</span></div>
+    </div>
+    <div class="tapnote" id="tapnote">Tap to set focus</div>
+    <div class="busy" id="busy"><div><span class="spin"></span><span id="busytxt">Working…</span></div></div>
+    <div class="drop">Drop your photo here</div>
+   </div>
+   <div class="bar">
+    <label class="btn pri" for="file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Upload</label>
+    <input type="file" id="file" accept="image/*" hidden>
+    <button class="btn ghost" id="bCmp" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M4 5h16v14H4z"/></svg>Compare</button>
+    <button class="btn ghost" id="bDepth" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18l6-6 4 4 8-8M3 21h18"/></svg>Depth map</button>
+    <button class="btn ghost" id="bFrame" aria-pressed="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v16h16M2 6h16v16"/></svg><span>Frame</span></button>
+    <button class="btn ghost" id="bAF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="12" r="2"/></svg>Auto focus</button>
+    <span class="grow"></span>
+    <span class="meta" id="stat"></span>
+   </div>
+   <p class="note" id="srcnote">Showing a sample scene. Upload, drop or paste a photo to render your own.</p>
+  </div>
+
+  <aside class="card navy panel" aria-label="Selected lens">
+   <div class="pimg"><img id="pImg" alt=""></div>
+   <h3 id="lname"></h3>
+   <div class="chips" id="lchips"></div>
+   <p class="look" id="llook"></p>
+   <div class="ctl" id="cFocal"><label for="rF">Focal length <output id="oF"></output></label><input type="range" id="rF"></div>
+   <div class="ctl"><label for="rN">Aperture <output id="oN"></output></label><input type="range" id="rN" min="0" step="1"></div>
+   <div class="ctl"><label for="rA">Lens character <output id="oA"></output></label><input type="range" id="rA" min="0" max="100" value="100"></div>
+   <div class="ctl" id="cFrame" hidden><label for="rZ">Lens crop <output id="oZ"></output></label><input type="range" id="rZ"><button class="linkbtn" id="bReframe">Re-frame around subject</button></div>
+   <div class="retouch">
+    <div class="rt-head"><b>AI retouch</b><span class="badge" id="aiBadge">On-device auto</span></div>
+    <p class="note">White balance, exposure, highlights, shadows and colour, set like a finished edit.</p>
+    <div class="ctl"><label for="rE">Retouch strength <output id="oE"></output></label><input type="range" id="rE" min="0" max="100" value="100"></div>
+    <div class="gemcta" id="gemCta" hidden><b>Make it smarter with Gemini, free</b><span>Connect your own free Gemini key and AI will set focus, aperture and the full edit for each photo.</span><button class="btn pri sm" id="gemCtaBtn">Connect free Gemini</button></div>
+    <button class="btn light sm" id="bGem">Connect free Gemini</button>
+   </div>
+   <div class="ai" id="ai" hidden>
+    <h4>AI scene reading</h4>
+    <dl><dt>Scene</dt><dd id="aiScene"></dd><dt>Subject</dt><dd id="aiSubj"></dd><dt>Light</dt><dd id="aiLight"></dd></dl>
+    <div id="aiPicks" class="picks"></div>
+    <p class="note" id="aiTip"></p>
+   </div>
+   <div class="dl">
+    <button class="btn light" id="bStd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg><span>Download standard<small>Free · 1280px</small></span></button>
+    <button class="btn pri" id="bHD"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg><span><span id="hdLabel">Download HD</span><small id="hdPrice">Full original size</small></span></button>
+   </div>
+  </aside>
+ </div>
+</section>
+
+<section class="sec" id="library">
+ <div class="wrap">
+  <div class="sec-head">
+   <div><h2>Lens library</h2><p id="libsub">40 flagship and cult lenses. Every sample is rendered live through that lens, and switches to your photo once you upload.</p></div>
+   <input class="search" id="q" type="search" placeholder="Search: 85mm, Leica, macro…" aria-label="Search lenses">
+  </div>
+  <div class="cats" id="cats" role="toolbar" aria-label="Lens categories"></div>
+  <div class="grid" id="grid"></div>
+  <p class="note empty" id="empty" hidden>No lens matches that search.</p>
+ </div>
+</section>
+
+<section class="wrap sec" id="pricing">
+ <div class="sec-head"><h2>Simple pricing</h2><p>Preview every lens for free. Pay only when you want the full-resolution file.</p></div>
+ <div class="prices">
+  <div class="card glass price"><small>Preview</small><b>Free</b><p>All 40 lenses, AI retouch with your own free Gemini, tap-to-focus, framing and compare.</p><a class="btn ghost" href="#studio">Start rendering</a></div>
+  <div class="card glass price"><small>Standard download</small><b>Free</b><p>JPEG at 1280px on the long edge. Great for stories and chats.</p><a class="btn ghost" href="#studio">Download free</a></div>
+  <div class="card price hi"><small>HD download</small><b id="priceBig">—</b><p>Your photo's full original resolution, up to 6000px, maximum JPEG quality. Generated automatically the moment payment is confirmed. Pay once per photo.</p><a class="btn pri" href="#studio">Get HD</a></div>
+ </div>
+</section>
+
+<section class="wrap sec web-only" id="apps">
+ <div class="sec-head"><h2>Get Photobylens everywhere</h2><p>Free to install. Your photos stay on your device; AI runs on your own free Gemini.</p></div>
+ <div class="apps">
+  <div class="card glass app"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="4" width="24" height="40" rx="5" fill="#121331"/><rect x="15" y="9" width="18" height="28" rx="2" fill="#8b8dff"/><circle cx="24" cy="40.5" r="1.6" fill="#8b8dff"/></svg><div><h3>Android app</h3><p>Install the APK on any Android 7 or newer phone. Upload, retouch and save straight to your gallery.</p></div><a class="btn pri" data-dl="apk" href="#">Download APK</a><small class="note">Allow "Install unknown apps" for your browser when asked.</small></div>
+  <div class="card glass app"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="#121331"/><circle cx="24" cy="24" r="8" fill="#8b8dff"/><path d="M24 5a19 19 0 0 1 16.5 9.5H24M7.5 14.5 16 29M40.5 14.5 32 29" stroke="#8b8dff" stroke-width="3" fill="none"/></svg><div><h3>Chrome &amp; Edge extension</h3><p>Open the studio from your toolbar in one click. Works in Chrome, Edge, Brave and Opera.</p></div><a class="btn pri" data-dl="ext" href="#">Download extension</a><small class="note">Unzip, open chrome://extensions, turn on Developer mode, then Load unpacked.</small></div>
+  <div class="card glass app"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="9" width="38" height="28" rx="4" fill="#121331"/><rect x="9" y="13" width="30" height="20" rx="2" fill="#8b8dff"/><rect x="18" y="39" width="12" height="3" rx="1.5" fill="#121331"/></svg><div><h3>Web &amp; desktop</h3><p>Use it right here, or install it from your browser's address bar as a desktop app.</p></div><a class="btn ghost" data-dl="src" href="#">View on GitHub</a><small class="note">Open source. Every release is listed on GitHub.</small></div>
+ </div>
+</section>
+
+<section class="wrap sec" id="how">
+ <div class="card navy how">
+  <h2>How a lens is rendered</h2>
+  <div class="steps">
+   <div><span>1</span><h3>Your photo stays yours</h3><p>Decoded and rendered in your browser. Every lens makes a new copy, so the original file is never altered or cropped.</p></div>
+   <div><span>2</span><h3>AI reads and retouches</h3><p>Your own free Gemini finds the subject, maps the depth and decides the edit: focus point, aperture, white balance, exposure, highlights, shadows and colour.</p></div>
+   <div><span>3</span><h3>Optics, not filters</h3><p>Blur grows with distance from your focus point, scaled by focal length and aperture. Lights bloom into true bokeh: cat's-eye, swirl, soap-bubble or anamorphic oval.</p></div>
+   <div><span>4</span><h3>Each lens's character</h3><p>Micro-contrast, colour, vignette, distortion, fringing, glow, flare and grain are tuned to each lens's well-known rendering.</p></div>
+  </div>
+  <p class="limits">A phone sees roughly a 26mm field of view. Zoom and macro lenses crop in to match their framing, always keeping your subject whole; wide and fisheye lenses keep your full frame and add their projection. Nothing is redrawn or invented: it is your real photo, retouched and rendered through the lens. Results are faithful renderings of each lens's style, not captures from the real glass.</p>
+ </div>
+</section>
+</main>
+
+<footer class="wrap foot">
+ <span>© Photobylens · Diyara Prestige Enterprise</span>
+ <span>Lens names belong to their makers and describe each lens's optical style. Lens models are original 3D renders.</span>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+<div class="modal" id="payModal" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+ <div class="card glass mbox">
+  <h3 id="payTitle">Download in HD</h3>
+  <p id="payText">Your photo's full original resolution with this lens.</p>
+  <div class="mrow"><span id="payLens"></span><b id="payAmt"></b></div>
+  <div class="row"><button class="btn pri" id="payGo">Pay securely</button><button class="btn ghost" id="payX">Not now</button></div>
+  <p class="note" id="payNote">Secure checkout. After payment you return here and your HD file downloads automatically.</p>
+ </div>
+</div>
+<div class="modal" id="gemModal" role="dialog" aria-modal="true" aria-labelledby="gemTitle">
+ <div class="card glass mbox">
+  <h3 id="gemTitle">Connect your free Gemini</h3>
+  <p>Photobylens uses your own Google Gemini allowance to read each photo and set the perfect edit. It's free and takes a minute.</p>
+  <ol class="gsteps">
+   <li><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Open Google AI Studio</a> and sign in with your Google account.</li>
+   <li>Click <b>Create API key</b>, then copy it.</li>
+   <li>Paste it here.</li>
+  </ol>
+  <label class="fl" for="gemKey">Gemini API key</label>
+  <input id="gemKey" class="field" type="password" autocomplete="off" spellcheck="false" placeholder="AIza…">
+  <p class="err" id="gemErr" role="alert"></p>
+  <div class="row"><button class="btn pri" id="gemSave">Save and connect</button><button class="btn ghost" id="gemX">Cancel</button><button class="linkbtn" id="gemDel" hidden>Remove key</button></div>
+  <p class="note">Your key is saved only in this browser. Photos go straight from your browser to Google for analysis, never to our server. No billing needed. On Google's free tier, Google may use what you send to improve its products.</p>
+ </div>
+</div>
+<div class="modal" id="hdModal" role="dialog" aria-modal="true" aria-labelledby="hdTitle">
+ <div class="card glass mbox wide">
+  <h3 id="hdTitle">Your HD photo is ready</h3>
+  <img id="hdImg" alt="Your HD photo">
+  <p class="note" id="hdMeta"></p>
+  <div class="row"><a class="btn pri" id="hdLink" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download HD</a><button class="btn ghost" id="hdX">Close</button></div>
+ </div>
+</div>
+<div class="modal" id="waitModal" role="dialog" aria-modal="true" aria-labelledby="waitTitle">
+ <div class="card glass mbox">
+  <span class="spin" aria-hidden="true"></span>
+  <h3 id="waitTitle">Finish paying in the checkout window</h3>
+  <p>As soon as your payment is confirmed, your HD photo is generated here automatically and a Download HD button appears.</p>
+  <div class="row"><button class="btn ghost" id="waitX">Cancel</button></div>
+ </div>
+</div>
+<div class="modal" id="imgModal"><div class="card glass mbox wide"><img id="mimg" alt="Rendered photo"><p class="note">Right-click or long-press the image to save it.</p><button class="btn ghost" id="mclose">Close</button></div></div>
+
+<script src="assets/config.js"></script>
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/lenses.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lens3d.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

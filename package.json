@@ -1,0 +1,22 @@
+{
+  "name": "photobylens",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "See your phone photo through 40 legendary camera lenses. AI retouch, real bokeh, web app, Android APK and browser extension.",
+  "scripts": {
+    "start": "node server.js",
+    "build:pages": "node scripts/build.mjs pages",
+    "build:app": "node scripts/build.mjs app",
+    "build:ext": "node scripts/build.mjs ext"
+  },
+  "engines": { "node": ">=18" },
+  "devDependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/share": "^8.0.3"
+  }
+}
