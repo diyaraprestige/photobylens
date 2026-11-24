@@ -1,6 +1,6 @@
 {
   "name": "photobylens",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "See your phone photo through 40 legendary camera lenses. AI retouch, real bokeh, web app, Android APK and browser extension.",
