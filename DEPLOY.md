@@ -20,13 +20,13 @@ server.js             runs the whole site on any Node 18+ server
 
 ## How the GitHub repo works
 - **Website:** every push to `main` publishes the site to GitHub Pages (`.github/workflows/pages.yml`) at `https://diyaraprestige.github.io/photobylens/`.
-- **Apps:** every tag starting with `v` (for example `v1.0.1`), or a manual run of **Release** in the Actions tab, builds:
+- **Apps:** every push to `main` that changes the version in `package.json` (or a manual run of **Release** in the Actions tab) builds:
   - `Photobylens.apk`, the Android app (Capacitor 8),
   - `Photobylens-extension.zip`, the Chrome/Edge extension (Manifest V3),
   - `Photobylens-web.zip`, the website files,
 
   and publishes them as a GitHub Release. Download links of the form `releases/latest/download/...` always point to the newest release.
-- **New version:** change `"version"` in `package.json`, push, then create a tag: `git tag v1.0.1 && git push --tags`.
+- **New version:** change `"version"` in `package.json` (for example `1.0.1`) and push to `main`. Release `v1.0.1` appears a few minutes later.
 - **APK signing:** the release workflow signs the APK with the repo secrets `ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD` and `ANDROID_KEY_ALIAS`. Keep a private backup of the keystore: Android only installs updates signed with the same key.
 - **Payments for the app, extension and GitHub Pages:** GitHub Pages can't run the payment API. Deploy this same repo to Vercel (below), then in GitHub go to Settings → Secrets and variables → Actions → **Variables** and add `PBL_API_BASE` = your Vercel address (for example `https://photobylens.vercel.app/`). Re-run the workflows. Until then, HD shows "being set up" and the free standard download works everywhere.
 
